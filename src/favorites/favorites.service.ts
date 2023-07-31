@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Global, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Album,
   Artist,
@@ -7,6 +7,7 @@ import {
   Track,
 } from 'src/database/database.service';
 
+@Global()
 @Injectable()
 export class FavoritesService {
   constructor(private databaseService: DatabaseService) {}

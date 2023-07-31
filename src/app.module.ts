@@ -7,8 +7,6 @@ import { ArtistsModule } from './artists/artists.module';
 import { AlbumsModule } from './albums/albums.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { TracksModule } from './tracks/tracks.module';
-import { FavoritiesService } from './favorities/favorities.service';
-import { FavoritiesController } from './favorities/favorities.controller';
 
 @Module({
   imports: [
@@ -19,7 +17,7 @@ import { FavoritiesController } from './favorities/favorities.controller';
     FavoritesModule,
     TracksModule,
   ],
-  controllers: [AppController, FavoritiesController],
-  providers: [AppService, FavoritiesService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
