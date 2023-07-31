@@ -31,9 +31,9 @@ export interface Album {
 }
 
 export interface Favorites {
-  artists: string[]; // favorite artists ids
-  albums: string[]; // favorite albums ids
-  tracks: string[]; // favorite tracks ids
+  artists: Artist[]; // favorite artists ids
+  albums: Album[]; // favorite albums ids
+  tracks: Track[]; // favorite tracks ids
 }
 
 @Injectable()
@@ -48,24 +48,3 @@ export class DatabaseService {
     tracks: [],
   };
 }
-
-//   create(user: User): User {
-//     this.users.push(user);
-//     return user;
-//   }
-
-//   getUsers(): User[] {
-//     const users = this.users;
-//     if (!users) {
-//       throw new NotFoundException('There are no users');
-//     }
-//     return users;
-//   }
-
-//   getById(id: string): User {
-//     const user = this.users.find((u) => u.id === id);
-//     if (!user) {
-//       throw new NotFoundException('User not found');
-//     }
-//     return user;
-//   }

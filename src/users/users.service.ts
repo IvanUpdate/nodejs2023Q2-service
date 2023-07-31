@@ -1,13 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService, User } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateUserDto } from './dto/update.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private databaseService: DatabaseService) {}
 
-  async getUsers(): Promise<User[]> {
+  async getAll(): Promise<User[]> {
     const users = await this.databaseService.users;
     if (!users) {
       throw new NotFoundException('There are no users');
@@ -15,7 +21,7 @@ export class UsersService {
     return users;
   }
 
-  async getUserById(id: string): Promise<User> {
+  async getOne(id: string): Promise<User> {
     const user = await this.databaseService.users.find((u) => u.id === id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -23,7 +29,7 @@ export class UsersService {
     return user;
   }
 
-  async addUser(dto: CreateUserDto): Promise<void> {
+  async create(dto: CreateUserDto): Promise<void> {
     const user = {
       id: uuidv4(),
       login: dto.login,
@@ -34,22 +40,36 @@ export class UsersService {
     };
     await this.databaseService.users.push(user);
   }
+
+  async update(id: string, dto: UpdateUserDto): Promise<boolean> {
+    const index = await this.databaseService.users.findIndex(
+      (user) => user.id === id,
+    );
+
+    if (index === -1) {
+      throw new NotFoundException("User doesn't exist");
+    }
+
+    if (this.databaseService.users[index].password != dto.oldPassword) {
+      throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
+    }
+
+    this.databaseService.users[index].password = dto.newPassword;
+    this.databaseService.users[index].version += 1;
+    return true;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const index = await this.databaseService.users.findIndex(
+      (user) => user.id === id,
+    );
+
+    if (index === -1) {
+      throw new NotFoundException('User not found');
+    }
+
+    this.databaseService.users.splice(index, 1);
+
+    return true;
+  }
 }
-
-//   async editUser(
-//     userId: number,
-//     dto: EditUserDto,
-//   ) {
-//     const user = await this.prisma.user.update({
-//       where: {
-//         id: userId,
-//       },
-//       data: {
-//         ...dto,
-//       },
-//     });
-
-//     delete user.hash;
-
-//     return user;
-//   }

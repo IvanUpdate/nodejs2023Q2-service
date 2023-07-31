@@ -3,10 +3,14 @@ import { DatabaseService, Track } from 'src/database/database.service';
 import { CreateTrackDto } from './dto/create.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateTrackDto } from './dto/update.dto';
+import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Injectable()
 export class TracksService {
-  constructor(private databaseService: DatabaseService) {}
+  constructor(
+    private databaseService: DatabaseService,
+    private favoriteService: FavoritesService,
+  ) {}
 
   async getAll(): Promise<Track[]> {
     const tracks = await this.databaseService.tracks;
@@ -59,13 +63,21 @@ export class TracksService {
     const index = await this.databaseService.tracks.findIndex(
       (track) => track.id === id,
     );
-    console.log(index);
 
     if (index === -1) {
       throw new NotFoundException('Track not found');
     }
 
     this.databaseService.tracks.splice(index, 1);
+
+    const index_favorites =
+      await this.databaseService.favorites.tracks.findIndex(
+        (track) => track.id === id,
+      );
+
+    if (index_favorites !== -1) {
+      this.favoriteService.deleteTrack(id);
+    }
 
     return true;
   }
