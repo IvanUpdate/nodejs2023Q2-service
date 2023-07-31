@@ -15,7 +15,7 @@ export class UsersService {
 
   async getAll(): Promise<User[]> {
     const users = await this.databaseService.users;
-    if (!users) {
+    if (!users || users.length === 0) {
       throw new NotFoundException('There are no users');
     }
     return users;
@@ -29,7 +29,7 @@ export class UsersService {
     return user;
   }
 
-  async create(dto: CreateUserDto): Promise<void> {
+  async create(dto: CreateUserDto): Promise<string> {
     const user = {
       id: uuidv4(),
       login: dto.login,
@@ -39,6 +39,7 @@ export class UsersService {
       updatedAt: Date.now(),
     };
     await this.databaseService.users.push(user);
+    return user.id;
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<boolean> {
@@ -50,7 +51,7 @@ export class UsersService {
       throw new NotFoundException("User doesn't exist");
     }
 
-    if (this.databaseService.users[index].password != dto.oldPassword) {
+    if (this.databaseService.users[index].password !== dto.oldPassword) {
       throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
     }
 
