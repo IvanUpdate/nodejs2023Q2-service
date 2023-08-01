@@ -31,8 +31,7 @@ export class TracksController {
   @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() dto: CreateTrackDto) {
-    this.tracksService.createTrack(dto);
-    return dto;
+    return this.tracksService.createTrack(dto);
   }
 
   @UsePipes(new ValidationPipe())

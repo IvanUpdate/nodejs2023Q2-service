@@ -31,8 +31,7 @@ export class ArtistsController {
   @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() dto: CreateArtistDto) {
-    this.artistsService.create(dto);
-    return dto;
+    return this.artistsService.create(dto);
   }
 
   @UsePipes(new ValidationPipe())

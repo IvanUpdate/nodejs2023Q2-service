@@ -31,8 +31,7 @@ export class AlbumsController {
   @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() dto: CreateAlbumDto) {
-    this.albumsService.create(dto);
-    return dto;
+    return this.albumsService.create(dto);
   }
 
   @UsePipes(new ValidationPipe())
