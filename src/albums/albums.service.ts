@@ -28,7 +28,7 @@ export class AlbumsService {
     return album;
   }
 
-  async create(dto: CreateAlbumDto): Promise<Album> {
+  create(dto: CreateAlbumDto): Album {
     const album = {
       id: uuidv4(),
       name: dto.name,
@@ -36,7 +36,7 @@ export class AlbumsService {
       artistId: null,
       ...dto,
     };
-    await this.databaseService.albums.push(album);
+    this.databaseService.albums.push(album);
     return album;
   }
 

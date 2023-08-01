@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
@@ -43,6 +44,7 @@ export class FavoritesController {
   }
 
   @Delete('/artist/:id')
+  @HttpCode(204)
   delete_artist(@Param('id', ParseUUIDPipe) id: string) {
     return this.favoriteService.deleteArtist(id);
   }
