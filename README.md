@@ -1,5 +1,5 @@
 # Home Library Service
-
+//--noStackTrace
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
