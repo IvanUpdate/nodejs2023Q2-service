@@ -34,11 +34,13 @@ export class FavoritesController {
   }
 
   @Delete('/track/:id')
+  @HttpCode(204)
   delete_track(@Param('id', ParseUUIDPipe) id: string) {
     return this.favoriteService.deleteTrack(id);
   }
 
   @Delete('/album/:id')
+  @HttpCode(204)
   delete_album(@Param('id', ParseUUIDPipe) id: string) {
     return this.favoriteService.deleteAlbum(id);
   }

@@ -1,4 +1,4 @@
-import { Global, Injectable, NotFoundException } from '@nestjs/common';
+import { Global, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import {
   Album,
   Artist,
@@ -25,9 +25,16 @@ export class FavoritesService {
       (track) => track.id === id,
     );
     if (index === -1) {
-      throw new NotFoundException('Track not found');
+      throw new UnprocessableEntityException('Track not found');
     }
+
     const track = await this.databaseService.tracks[index];
+    const index_check = await this.databaseService.favorites.tracks.findIndex(
+      (track) => track.id === id,
+    );
+    if (index_check > 0) {
+      return track;
+    }
     this.databaseService.favorites.tracks.push(track);
     return track;
   }
@@ -37,9 +44,15 @@ export class FavoritesService {
       (album) => album.id === id,
     );
     if (index === -1) {
-      throw new NotFoundException('Album not found');
+      throw new UnprocessableEntityException('Album not found');
     }
     const album = await this.databaseService.albums[index];
+    const index_check = await this.databaseService.favorites.albums.findIndex(
+      (album) => album.id === id,
+    );
+    if (index_check > 0) {
+      return album;
+    }
     this.databaseService.favorites.albums.push(album);
     return album;
   }
@@ -49,15 +62,21 @@ export class FavoritesService {
       (artist) => artist.id === id,
     );
     if (index === -1) {
-      throw new NotFoundException('Artist not found');
+      throw new UnprocessableEntityException('Artist not found');
     }
     const artist = await this.databaseService.artists[index];
+    const index_check = await this.databaseService.favorites.artists.findIndex(
+      (artist) => artist.id === id,
+    );
+    if (index_check > 0) {
+      return artist;
+    }
     this.databaseService.favorites.artists.push(artist);
     return artist;
   }
 
-  async deleteTrack(id: string): Promise<boolean> {
-    const index = await this.databaseService.tracks.findIndex(
+  deleteTrack(id: string): boolean {
+    const index = this.databaseService.favorites.tracks.findIndex(
       (track) => track.id === id,
     );
 
@@ -65,13 +84,13 @@ export class FavoritesService {
       throw new NotFoundException('Track not found');
     }
 
-    this.databaseService.tracks.splice(index, 1);
+    this.databaseService.favorites.tracks.splice(index, 1);
 
     return true;
   }
 
-  async deleteAlbum(id: string): Promise<boolean> {
-    const index = await this.databaseService.albums.findIndex(
+  deleteAlbum(id: string): boolean {
+    const index = this.databaseService.favorites.albums.findIndex(
       (album) => album.id === id,
     );
 
@@ -79,13 +98,13 @@ export class FavoritesService {
       throw new NotFoundException('Album not found');
     }
 
-    this.databaseService.albums.splice(index, 1);
+    this.databaseService.favorites.albums.splice(index, 1);
 
     return true;
   }
 
   deleteArtist(id: string): boolean {
-    const index = this.databaseService.artists.findIndex(
+    const index = this.databaseService.favorites.artists.findIndex(
       (artist) => artist.id === id,
     );
 
@@ -93,7 +112,7 @@ export class FavoritesService {
       throw new NotFoundException('Artist not found');
     }
 
-    this.databaseService.artists.splice(index, 1);
+    this.databaseService.favorites.artists.splice(index, 1);
 
     return true;
   }
