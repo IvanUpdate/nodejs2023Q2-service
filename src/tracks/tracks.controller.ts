@@ -14,7 +14,7 @@ import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create.dto';
 import { UpdateTrackDto } from './dto/update.dto';
 
-@Controller('tracks')
+@Controller('track')
 export class TracksController {
   constructor(private tracksService: TracksService) {}
 

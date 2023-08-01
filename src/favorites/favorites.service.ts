@@ -84,8 +84,8 @@ export class FavoritesService {
     return true;
   }
 
-  async deleteArtist(id: string): Promise<boolean> {
-    const index = await this.databaseService.artists.findIndex(
+  deleteArtist(id: string): boolean {
+    const index = this.databaseService.artists.findIndex(
       (artist) => artist.id === id,
     );
 

@@ -64,6 +64,8 @@ export class TracksService {
       (track) => track.id === id,
     );
 
+    console.log(index === -1);
+
     if (index === -1) {
       throw new NotFoundException('Track not found');
     }

@@ -16,7 +16,7 @@ export class UsersService {
 
   async getAll(): Promise<User[]> {
     const users = await this.databaseService.users;
-    if (!users || users.length === 0) {
+    if (!users) {
       throw new NotFoundException('There are no users');
     }
     return users.map((user) => {
@@ -24,7 +24,7 @@ export class UsersService {
     });
   }
 
-  async getOne(id: string): Promise<User> {
+  async getOne(id: string): Promise<User_Optimized> {
     const user = await this.databaseService.users.find((u) => u.id === id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -32,17 +32,18 @@ export class UsersService {
     return new User_Optimized(user);
   }
 
-  async create(dto: CreateUserDto): Promise<string> {
+  create(dto: CreateUserDto): User_Optimized {
+    const date = Date.now();
     const user = {
       id: uuidv4(),
       login: dto.login,
       password: dto.password,
       version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: date,
+      updatedAt: date,
     };
-    await this.databaseService.users.push(user);
-    return user.id;
+    this.databaseService.users.push(user);
+    return new User_Optimized(user);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<boolean> {
