@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
+import { User } from 'src/database/database.service';
 
-export class User_Optimized {
+export class User_Optimized implements User {
   id: string;
   login: string;
   version: number;

@@ -43,10 +43,12 @@ export class UsersService {
       updatedAt: date,
     };
     this.databaseService.users.push(user);
-    return new User_Optimized(user);
+    const user_final = new User_Optimized(user);
+    delete user_final.password;
+    return user_final;
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<boolean> {
+  async update(id: string, dto: UpdateUserDto): Promise<User_Optimized> {
     const index = this.databaseService.users.findIndex(
       (user) => user.id === id,
     );
@@ -61,7 +63,10 @@ export class UsersService {
 
     this.databaseService.users[index].password = dto.newPassword;
     this.databaseService.users[index].version += 1;
-    return true;
+    this.databaseService.users[index].updatedAt = Date.now();
+    const user = new User_Optimized(this.databaseService.users[index]);
+    delete user.password;
+    return user;
   }
 
   async delete(id: string): Promise<boolean> {
