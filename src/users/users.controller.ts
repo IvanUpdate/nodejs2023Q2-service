@@ -30,20 +30,18 @@ export class UsersController {
 
   @UsePipes(new ValidationPipe())
   @Post()
-  create(@Body() dto: CreateUserDto) {
-    this.usersService.create(dto);
-    return dto;
+  async create(@Body() dto: CreateUserDto) {
+    return await this.usersService.create(dto);
   }
 
   @UsePipes(new ValidationPipe())
   @Put('/:id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUserDto) {
-    this.usersService.update(id, dto);
-    return 'Password was updated';
+    return this.usersService.update(id, dto);
   }
 
   @Delete('/:id')
   delete(@Param('id', ParseUUIDPipe) id: string) {
-    this.usersService.delete(id);
+    return this.usersService.delete(id);
   }
 }

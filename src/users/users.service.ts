@@ -8,6 +8,7 @@ import { DatabaseService, User } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateUserDto } from './dto/update.dto';
+import { User_Optimized } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,9 @@ export class UsersService {
     if (!users || users.length === 0) {
       throw new NotFoundException('There are no users');
     }
-    return users;
+    return users.map((user) => {
+      return new User_Optimized(user);
+    });
   }
 
   async getOne(id: string): Promise<User> {
@@ -26,7 +29,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return new User_Optimized(user);
   }
 
   async create(dto: CreateUserDto): Promise<string> {
@@ -43,12 +46,12 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<boolean> {
-    const index = await this.databaseService.users.findIndex(
+    const index = this.databaseService.users.findIndex(
       (user) => user.id === id,
     );
 
     if (index === -1) {
-      throw new NotFoundException("User doesn't exist");
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     if (this.databaseService.users[index].password !== dto.oldPassword) {

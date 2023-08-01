@@ -14,9 +14,9 @@ export class TracksService {
 
   async getAll(): Promise<Track[]> {
     const tracks = await this.databaseService.tracks;
-    if (!tracks) {
-      throw new NotFoundException('There are no tracks');
-    }
+    // if (!tracks) {
+    //   throw new NotFoundException('There are no tracks');
+    // }
     return tracks;
   }
 
