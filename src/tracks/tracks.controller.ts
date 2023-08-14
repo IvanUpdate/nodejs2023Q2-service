@@ -32,13 +32,13 @@ export class TracksController {
   @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() dto: CreateTrackDto) {
-    return this.tracksService.createTrack(dto);
+    return this.tracksService.create(dto);
   }
 
   @UsePipes(new ValidationPipe())
   @Put('/:id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTrackDto) {
-    return this.tracksService.updateTrack(id, dto);
+    return this.tracksService.update(id, dto);
   }
 
   @Delete('/:id')
