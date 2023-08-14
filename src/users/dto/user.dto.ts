@@ -1,17 +1,12 @@
-import { Exclude } from 'class-transformer';
-import { User } from 'src/database/database.service';
+import { User } from '@prisma/client';
 
-export class User_Optimized implements User {
-  id: string;
-  login: string;
-  version: number;
-  createdAt: number;
-  updatedAt: number;
-
-  @Exclude()
-  password: string;
-
-  constructor(partial: Partial<User_Optimized>) {
-    Object.assign(this, partial);
-  }
+export function formatUser(user: User) {
+  const formatUser = {
+    ...user,
+    createdAt: new Date(user.createdAt).getTime(),
+    updatedAt: new Date(user.updatedAt).getTime(),
+  };
+  delete formatUser.password;
+  console.log(formatUser);
+  return formatUser;
 }

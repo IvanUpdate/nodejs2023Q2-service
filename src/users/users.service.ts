@@ -4,82 +4,76 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DatabaseService, User } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateUserDto } from './dto/update.dto';
-import { User_Optimized } from './dto/user.dto';
+import { formatUser } from './dto/user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private databaseService: DatabaseService) {}
+  constructor(private prismaService: PrismaService) {}
 
-  async getAll(): Promise<User[]> {
-    const users = await this.databaseService.users;
-    if (!users) {
-      throw new NotFoundException('There are no users');
-    }
-    return users.map((user) => {
-      return new User_Optimized(user);
-    });
+  async getAll() {
+    const users = await this.prismaService.user.findMany();
+    return users.map((user) => formatUser(user));
   }
 
-  async getOne(id: string): Promise<User_Optimized> {
-    const user = await this.databaseService.users.find((u) => u.id === id);
+  async getOne(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return new User_Optimized(user);
+    return formatUser(user);
   }
 
-  create(dto: CreateUserDto): User_Optimized {
-    const date = Date.now();
-    const user = {
-      id: uuidv4(),
-      login: dto.login,
-      password: dto.password,
-      version: 1,
-      createdAt: date,
-      updatedAt: date,
-    };
-    this.databaseService.users.push(user);
-    const user_final = new User_Optimized(user);
-    delete user_final.password;
-    return user_final;
+  async create(dto: CreateUserDto) {
+    const user = await this.prismaService.user.create({ data: dto });
+    return formatUser(user);
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<User_Optimized> {
-    const index = this.databaseService.users.findIndex(
-      (user) => user.id === id,
-    );
+  async update(id: string, dto: UpdateUserDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
 
-    if (index === -1) {
+    if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    if (this.databaseService.users[index].password !== dto.oldPassword) {
+    if (user.password !== dto.oldPassword) {
       throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
     }
 
-    this.databaseService.users[index].password = dto.newPassword;
-    this.databaseService.users[index].version += 1;
-    this.databaseService.users[index].updatedAt = Date.now();
-    const user = new User_Optimized(this.databaseService.users[index]);
-    delete user.password;
-    return user;
+    const updateUser = await this.prismaService.user.update({
+      where: { id },
+      data: {
+        password: dto.newPassword,
+        version: { increment: 1 },
+      },
+    });
+    return formatUser(updateUser);
   }
 
-  async delete(id: string): Promise<boolean> {
-    const index = await this.databaseService.users.findIndex(
-      (user) => user.id === id,
-    );
+  async delete(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
 
-    if (index === -1) {
+    if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    this.databaseService.users.splice(index, 1);
-
-    return true;
+    return this.prismaService.user.delete({
+      where: {
+        id: id,
+      },
+    });
   }
 }

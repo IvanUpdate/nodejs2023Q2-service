@@ -1,60 +1,44 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Album, DatabaseService } from 'src/database/database.service';
 import { CreateAlbumDto } from './dto/create.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateAlbumDto } from './dto/update.dto';
-import { FavoritesService } from 'src/favorites/favorites.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AlbumsService {
-  constructor(
-    private databaseService: DatabaseService,
-    private favoriteService: FavoritesService,
-  ) {}
+  constructor(private prismaService: PrismaService) {}
 
-  async getAll(): Promise<Album[]> {
-    const albums = await this.databaseService.albums;
-    if (!albums) {
-      throw new NotFoundException('There are no albums');
-    }
-    return albums;
+  async getAll() {
+    return this.prismaService.album.findMany();
   }
 
-  async getOne(id: string): Promise<Album> {
-    const album = await this.databaseService.albums.find((u) => u.id === id);
+  async getOne(id: string) {
+    const album = await this.prismaService.album.findUnique({
+      where: {
+        id: id,
+      },
+    });
     if (!album) {
       throw new NotFoundException('Album not found');
     }
     return album;
   }
 
-  create(dto: CreateAlbumDto): Album {
-    const album = {
-      id: uuidv4(),
-      name: dto.name,
-      year: dto.year,
-      artistId: null,
-      ...dto,
-    };
-    this.databaseService.albums.push(album);
+  async create(dto: CreateAlbumDto) {
+    const album = await this.prismaService.album.create({ data: dto });
     return album;
   }
 
-  async update(id: string, dto: UpdateAlbumDto): Promise<Album | undefined> {
-    const index = await this.databaseService.albums.findIndex(
-      (track) => track.id === id,
-    );
+  async update(id: string, dto: UpdateAlbumDto) {
+    const album = await this.prismaService.album.update({
+      where: { id },
+      data: dto,
+    });
 
-    if (index === -1) {
+    if (!album) {
       throw new NotFoundException('Albums not found');
     }
-
-    const updatedAlbum = {
-      ...this.databaseService.albums[index],
-      ...dto,
-    };
-    this.databaseService.albums[index] = updatedAlbum;
-    return updatedAlbum;
+    return album;
   }
 
   async delete(id: string): Promise<boolean> {
