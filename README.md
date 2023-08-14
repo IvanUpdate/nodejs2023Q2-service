@@ -1,5 +1,5 @@
 # Home Library Service
-
+//--noStackTrace
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
@@ -9,6 +9,10 @@
 
 ```
 git clone {repository URL}
+
+## docker hub db
+
+https://hub.docker.com/repository/docker/ivaho/postgres/general
 ```
 
 ## Installing NPM modules
