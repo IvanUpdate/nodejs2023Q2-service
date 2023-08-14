@@ -7,6 +7,5 @@ export function formatUser(user: User) {
     updatedAt: new Date(user.updatedAt).getTime(),
   };
   delete formatUser.password;
-  console.log(formatUser);
   return formatUser;
 }

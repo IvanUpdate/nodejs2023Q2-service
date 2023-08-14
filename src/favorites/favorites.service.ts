@@ -5,6 +5,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { formatData } from './utils/format';
 
 @Global()
 @Injectable()
@@ -22,9 +23,9 @@ export class FavoritesService {
       where: { isFavourite: true },
     });
     return {
-      tracks: tracks,
-      albums: albums,
-      artists: artists,
+      tracks: tracks.map((track) => formatData(track)),
+      albums: albums.map((album) => formatData(album)),
+      artists: artists.map((artist) => formatData(artist)),
     };
   }
 
