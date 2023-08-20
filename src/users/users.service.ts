@@ -9,12 +9,16 @@ import { UpdateUserDto } from './dto/update.dto';
 import { formatUser } from './dto/user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { LoggingService } from 'src/common/logging/logging.service';
 
-const SALT = process.env.SALT || 10;
+const SALT = Number(process.env.CRYPT_SALT) || 10;
 
 @Injectable()
 export class UsersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly loggingservice: LoggingService,
+  ) {}
 
   async getAll() {
     const users = await this.prismaService.user.findMany();
@@ -34,12 +38,15 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
+    console.log(typeof SALT);
     const hash = await bcrypt.hash(dto.password, SALT);
+    console.log(hash);
 
     const data = {
       login: dto.login,
       password: hash,
     };
+    console.log(data);
     const user = await this.prismaService.user.create({ data: data });
     return formatUser(user);
   }
@@ -55,7 +62,9 @@ export class UsersService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    if (user.password !== dto.oldPassword) {
+    const hash = await bcrypt.hash(dto.oldPassword, SALT);
+
+    if (user.password !== hash) {
       throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
     }
 
