@@ -8,6 +8,9 @@ import { CreateUserDto } from './dto/create.dto';
 import { UpdateUserDto } from './dto/update.dto';
 import { formatUser } from './dto/user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+
+const SALT = process.env.SALT || 10;
 
 @Injectable()
 export class UsersService {
@@ -31,7 +34,13 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
-    const user = await this.prismaService.user.create({ data: dto });
+    const hash = await bcrypt.hash(dto.password, SALT);
+
+    const data = {
+      login: dto.login,
+      password: hash,
+    };
+    const user = await this.prismaService.user.create({ data: data });
     return formatUser(user);
   }
 
@@ -75,5 +84,17 @@ export class UsersService {
         id: id,
       },
     });
+  }
+
+  async getOneByLogin(login: string) {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        login: login,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }
