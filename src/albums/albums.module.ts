@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AlbumsController } from './albums.controller';
 import { AlbumsService } from './albums.service';
-import { FavoritesService } from 'src/favorites/favorites.service';
 import { FavoritesModule } from 'src/favorites/favorites.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [FavoritesService, FavoritesModule],
-  providers: [AlbumsService],
+  imports: [FavoritesModule, AuthModule],
+  providers: [AlbumsService, JwtService],
   controllers: [AlbumsController],
-  exports: [AlbumsService, FavoritesService],
+  exports: [AlbumsService],
 })
 export class AlbumsModule {}

@@ -1,16 +1,21 @@
-import {
-  Global,
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Global, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { formatData } from './utils/format';
+import { LoggingService } from 'src/common/logging/logging.service';
+import {
+  AlbumNotFoundError,
+  ArtistNotFoundError,
+  ItemNotFoundError,
+  TrackNotFoundError,
+} from 'src/common/filters/custom-exception.filter';
 
 @Global()
 @Injectable()
 export class FavoritesService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly loggingservice: LoggingService,
+  ) {}
 
   async getAll() {
     const tracks = await this.prismaService.track.findMany({
@@ -37,9 +42,13 @@ export class FavoritesService {
           isFavourite: true,
         },
       });
+      if (!track) {
+        throw new ItemNotFoundError();
+      }
       return track;
     } catch (e) {
-      throw new UnprocessableEntityException('Track not found');
+      this.loggingservice.logError(ItemNotFoundError.name, 'Track not found');
+      throw new ItemNotFoundError();
     }
   }
 
@@ -53,7 +62,8 @@ export class FavoritesService {
       });
       return album;
     } catch (e) {
-      throw new UnprocessableEntityException('Track not found');
+      this.loggingservice.logError(ItemNotFoundError.name, 'Album not found');
+      throw new ItemNotFoundError();
     }
   }
 
@@ -67,7 +77,8 @@ export class FavoritesService {
       });
       return artist;
     } catch (e) {
-      throw new UnprocessableEntityException('Track not found');
+      this.loggingservice.logError(ItemNotFoundError.name, 'Artist not found');
+      throw new ItemNotFoundError();
     }
   }
 
@@ -81,7 +92,8 @@ export class FavoritesService {
       });
       return track;
     } catch (e) {
-      throw new NotFoundException('Track not found');
+      this.loggingservice.logError(TrackNotFoundError.name, 'Track not found');
+      throw new TrackNotFoundError();
     }
   }
 
@@ -95,7 +107,8 @@ export class FavoritesService {
       });
       return album;
     } catch (e) {
-      throw new NotFoundException('Album not found');
+      this.loggingservice.logError(AlbumNotFoundError.name, 'Album not found');
+      throw new AlbumNotFoundError();
     }
   }
 
@@ -109,10 +122,11 @@ export class FavoritesService {
       });
       return artist;
     } catch (e) {
-      throw new NotFoundException('Artist not found');
+      this.loggingservice.logError(
+        ArtistNotFoundError.name,
+        'Artist not found',
+      );
+      throw new ArtistNotFoundError();
     }
   }
-
-  
-
 }

@@ -10,8 +10,6 @@ import { TracksModule } from './tracks/tracks.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggingService } from './common/logging/logging.service';
-import { APP_FILTER } from '@nestjs/core';
-import { CustomExceptionFilter } from './common/filters/custom-exception.filter';
 
 @Module({
   imports: [
@@ -25,13 +23,6 @@ import { CustomExceptionFilter } from './common/filters/custom-exception.filter'
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    LoggingService,
-    {
-      provide: APP_FILTER,
-      useClass: CustomExceptionFilter,
-    },
-  ],
+  providers: [AppService, LoggingService],
 })
 export class AppModule {}

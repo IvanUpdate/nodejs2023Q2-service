@@ -9,8 +9,8 @@ export class LoggingService {
     fs.appendFileSync(this.logFilePath, data + '\n');
   }
 
-  logRequest(url: string, method: string, body: any) {
-    const logMessage = `Incoming request: ${method} ${url}, Body: ${JSON.stringify(body)}`;
+  logRequest(url: string, method: string) {
+    const logMessage = `Incoming request: ${method} ${url}`;
     this.logToFile(logMessage);
   }
 

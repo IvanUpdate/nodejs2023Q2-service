@@ -1,15 +1,14 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create.dto';
 import { UpdateUserDto } from './dto/update.dto';
 import { formatUser } from './dto/user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { LoggingService } from 'src/common/logging/logging.service';
+import {
+  UserNotFoundError,
+  WrongPasswordError,
+} from 'src/common/filters/custom-exception.filter';
 
 const SALT = Number(process.env.CRYPT_SALT) || 10;
 
@@ -32,21 +31,20 @@ export class UsersService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      this.loggingservice.logError(UserNotFoundError.name, 'User not found');
+      throw new UserNotFoundError();
     }
     return formatUser(user);
   }
 
   async create(dto: CreateUserDto) {
-    console.log(typeof SALT);
     const hash = await bcrypt.hash(dto.password, SALT);
-    console.log(hash);
+    console.log('making new password', hash);
 
     const data = {
       login: dto.login,
       password: hash,
     };
-    console.log(data);
     const user = await this.prismaService.user.create({ data: data });
     return formatUser(user);
   }
@@ -59,19 +57,26 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      this.loggingservice.logError(UserNotFoundError.name, 'User not found');
+      throw new UserNotFoundError();
     }
 
     const hash = await bcrypt.hash(dto.oldPassword, SALT);
+    console.log(hash);
+    console.log(user.password);
 
     if (user.password !== hash) {
-      throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
+      this.loggingservice.logError(WrongPasswordError.name, 'Wrong password');
+      throw new WrongPasswordError();
     }
+
+    const update_hash = await bcrypt.hash(dto.newPassword, SALT);
+    console.log(update_hash);
 
     const updateUser = await this.prismaService.user.update({
       where: { id },
       data: {
-        password: dto.newPassword,
+        password: update_hash,
         version: { increment: 1 },
       },
     });
@@ -86,7 +91,8 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      this.loggingservice.logError(UserNotFoundError.name, 'User not found');
+      throw new UserNotFoundError();
     }
     return this.prismaService.user.delete({
       where: {
@@ -102,7 +108,8 @@ export class UsersService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      this.loggingservice.logError(UserNotFoundError.name, 'User not found');
+      throw new UserNotFoundError();
     }
     return user;
   }

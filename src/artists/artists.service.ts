@@ -3,10 +3,15 @@ import { CreateArtistDto } from './dto/create.dto';
 import { UpdateArtistDto } from './dto/update.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { formatArtist } from './dto/update.dto';
+import { LoggingService } from 'src/common/logging/logging.service';
+import { ArtistNotFoundError } from 'src/common/filters/custom-exception.filter';
 
 @Injectable()
 export class ArtistsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly loggingservice: LoggingService,
+  ) {}
 
   async getAll() {
     return this.prismaService.artist.findMany();
@@ -19,7 +24,11 @@ export class ArtistsService {
       },
     });
     if (!artist) {
-      throw new NotFoundException('Artist not found');
+      this.loggingservice.logError(
+        ArtistNotFoundError.name,
+        'Artist not found',
+      );
+      throw new ArtistNotFoundError();
     }
     return formatArtist(artist);
   }
@@ -37,7 +46,11 @@ export class ArtistsService {
       });
       return formatArtist(artist);
     } catch (e) {
-      throw new NotFoundException('Artist not found');
+      this.loggingservice.logError(
+        ArtistNotFoundError.name,
+        'Artist not found',
+      );
+      throw new ArtistNotFoundError();
     }
   }
 
@@ -58,7 +71,11 @@ export class ArtistsService {
       });
       return true;
     } catch (e) {
-      throw new NotFoundException('Artist not found');
+      this.loggingservice.logError(
+        ArtistNotFoundError.name,
+        'Artist not found',
+      );
+      throw new ArtistNotFoundError();
     }
   }
 }

@@ -36,7 +36,9 @@ export class JwtAuthGuard implements CanActivate {
 
   private validateToken(token: string) {
     try {
-      return this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+      return this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET_KEY,
+      });
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }

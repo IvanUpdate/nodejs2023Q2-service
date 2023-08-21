@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create.dto';
 import { UpdateAlbumDto } from './dto/update.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { LoggingService } from 'src/common/logging/logging.service';
+import { AlbumNotFoundError } from 'src/common/filters/custom-exception.filter';
 
 @Injectable()
 export class AlbumsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly loggingservice: LoggingService,
+  ) {}
 
   async getAll() {
     return this.prismaService.album.findMany();
@@ -18,7 +23,8 @@ export class AlbumsService {
       },
     });
     if (!album) {
-      throw new NotFoundException('Album not found');
+      this.loggingservice.logError(AlbumNotFoundError.name, 'Album not found');
+      throw new AlbumNotFoundError();
     }
     return album;
   }
@@ -36,7 +42,8 @@ export class AlbumsService {
       });
       return album;
     } catch (e) {
-      throw new NotFoundException('Album not found');
+      this.loggingservice.logError(AlbumNotFoundError.name, 'Album not found');
+      throw new AlbumNotFoundError();
     }
   }
 
@@ -51,7 +58,8 @@ export class AlbumsService {
       });
       return true;
     } catch (e) {
-      throw new NotFoundException('Album not found');
+      this.loggingservice.logError(AlbumNotFoundError.name, 'Album not found');
+      throw new AlbumNotFoundError();
     }
   }
 }

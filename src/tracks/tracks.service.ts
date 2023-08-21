@@ -2,10 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create.dto';
 import { UpdateTrackDto } from './dto/update.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { LoggingService } from 'src/common/logging/logging.service';
+import { TrackNotFoundError } from 'src/common/filters/custom-exception.filter';
 
 @Injectable()
 export class TracksService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly loggingservice: LoggingService,
+  ) {}
 
   async getAll() {
     return this.prismaService.track.findMany();
@@ -18,7 +23,8 @@ export class TracksService {
       },
     });
     if (!track) {
-      throw new NotFoundException('Track not found');
+      this.loggingservice.logError(TrackNotFoundError.name, 'Track not found');
+      throw new TrackNotFoundError();
     }
     return track;
   }
@@ -36,7 +42,8 @@ export class TracksService {
       });
       return track;
     } catch (e) {
-      throw new NotFoundException('Track not found');
+      this.loggingservice.logError(TrackNotFoundError.name, 'Track not found');
+      throw new TrackNotFoundError();
     }
   }
 
@@ -45,7 +52,8 @@ export class TracksService {
       await this.prismaService.track.delete({ where: { id } });
       return true;
     } catch (e) {
-      throw new NotFoundException('Track not found');
+      this.loggingservice.logError(TrackNotFoundError.name, 'Track not found');
+      throw new TrackNotFoundError();
     }
   }
 }
