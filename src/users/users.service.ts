@@ -61,17 +61,17 @@ export class UsersService {
       throw new UserNotFoundError();
     }
 
-    const hash = await bcrypt.hash(dto.oldPassword, SALT);
-    console.log(hash);
-    console.log(user.password);
+    const isValidPassword = await bcrypt.compare(
+      dto.oldPassword,
+      user.password,
+    );
 
-    if (user.password !== hash) {
+    if (!isValidPassword) {
       this.loggingservice.logError(WrongPasswordError.name, 'Wrong password');
       throw new WrongPasswordError();
     }
 
     const update_hash = await bcrypt.hash(dto.newPassword, SALT);
-    console.log(update_hash);
 
     const updateUser = await this.prismaService.user.update({
       where: { id },
