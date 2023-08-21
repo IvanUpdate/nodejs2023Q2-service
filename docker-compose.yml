@@ -5,7 +5,6 @@ services:
     image: node:18-alpine
     container_name: app
     command: npm start
-    restart: always
     build:
       dockerfile: Dockerfile
       context: .
@@ -13,8 +12,6 @@ services:
       - ${PORT}:${PORT}
     networks:
       - docker-network
-    volumes:
-      - ./:/app
   
   postgres:
     image: postgres
