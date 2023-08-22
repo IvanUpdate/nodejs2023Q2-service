@@ -4,14 +4,14 @@ WORKDIR /app
 
 COPY package*.json /app/
 
-RUN npm install
+COPY prisma ./prisma/ 
 
-RUN npx prisma generate
+COPY .env ./.env
+
+RUN npm install
 
 COPY . .
 
-RUN npm run build
-
 EXPOSE ${PORT}
 
-CMD [ "npm", "run", "start:dev" ]
+CMD [ "npm", "run", "start:prisma" ]

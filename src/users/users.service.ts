@@ -39,7 +39,6 @@ export class UsersService {
 
   async create(dto: CreateUserDto) {
     const hash = await bcrypt.hash(dto.password, SALT);
-    console.log('making new password', hash);
 
     const data = {
       login: dto.login,
@@ -101,16 +100,5 @@ export class UsersService {
     });
   }
 
-  async getOneByLogin(login: string) {
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        login: login,
-      },
-    });
-    if (!user) {
-      this.loggingservice.logError(UserNotFoundError.name, 'User not found');
-      throw new UserNotFoundError();
-    }
-    return user;
-  }
+  
 }

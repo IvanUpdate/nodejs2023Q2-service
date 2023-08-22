@@ -6,16 +6,19 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from 'src/users/users.service';
 import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from 'src/users/dto/create.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UserNotFoundError } from 'src/common/filters/custom-exception.filter';
+
+const SALT = Number(process.env.CRYPT_SALT) || 10;
 
 @Injectable()
 export class AuthService {
+  loggingservice: any;
   constructor(
     private readonly jwtService: JwtService,
-    @Inject(UsersService)
-    private readonly userService: UsersService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   async hashPassword(password: string): Promise<string> {
@@ -23,7 +26,7 @@ export class AuthService {
   }
 
   async validateUser(dto: UserDto): Promise<any> {
-    const user = await this.userService.getOneByLogin(dto.login);
+    const user = await this.getOneByLogin(dto.login);
     if (user && (await bcrypt.compare(dto.password, user.password))) {
       return user;
     }
@@ -54,8 +57,7 @@ export class AuthService {
 
   async signUp(dto: CreateUserDto) {
     try {
-      const user = await this.userService.create(dto);
-      console.log(user);
+      const user = await this.create(dto);
       return { id: user.id };
     } catch (error) {
       throw new BadRequestException('Invalid credentionals');
@@ -82,5 +84,29 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  async getOneByLogin(login: string) {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        login: login,
+      },
+    });
+    if (!user) {
+      this.loggingservice.logError(UserNotFoundError.name, 'User not found');
+      throw new UserNotFoundError();
+    }
+    return user;
+  }
+
+  async create(dto: CreateUserDto) {
+    const hash = await bcrypt.hash(dto.password, SALT);
+
+    const data = {
+      login: dto.login,
+      password: hash,
+    };
+    const user = await this.prismaService.user.create({ data: data });
+    return user;
   }
 }

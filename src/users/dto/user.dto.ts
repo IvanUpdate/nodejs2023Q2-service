@@ -1,4 +1,13 @@
-import { User } from '@prisma/client';
+//import { User } from '@prisma/client';
+
+export type User = {
+  id: string;
+  login: string;
+  password: string;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export function formatUser(user: User) {
   const formatUser = {
