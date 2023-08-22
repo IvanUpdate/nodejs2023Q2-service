@@ -8,7 +8,7 @@ COPY prisma ./prisma/
 
 COPY .env ./.env
 
-RUN npm install
+RUN npm install  && npm cache clean --force
 
 COPY . .
 
